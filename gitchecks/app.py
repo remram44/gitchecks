@@ -74,7 +74,7 @@ def check_commit(check_whitespace=True, whitespace_near=0, line_style=None):
 
 def parse_cmdline(args):
     if len(args) <= 1:
-        sys.stderr.write(_(u"gitchecks called without arguments"))
+        sys.stderr.write(_(u"gitchecks called without arguments\n"))
         sys.exit(1)
     action = args[1]
     params = dict()
@@ -88,10 +88,6 @@ def parse_cmdline(args):
 
 
 def main():
-    if len(sys.argv) == 1:
-        sys.stderr.write(_(u"gitchecks called without arguments"))
-        sys.exit(1)
-
     action, params = parse_cmdline(sys.argv)
     if action == 'pre-commit':
         errors = check_commit(**params)

@@ -1,0 +1,49 @@
+# gitchecks: Pack of source checks to be used as commit hook.
+# Copyright (C) 2013 Remi Rampin
+# This file is distributed under the same license as the gitchecks package.
+# Remi Rampin <remirampin@gmail.com>, 2013.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: 0.1\n"
+"Report-Msgid-Bugs-To: remirampin@gmail.com\n"
+"POT-Creation-Date: 2013-03-08 18:28-0500\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: gitchecks\app.py:46
+msgid ""
+"in {file}, line {line}: trailing whitespace within {context_lines} lines of "
+"change"
+msgstr ""
+
+#: gitchecks\app.py:56
+msgid "in {file}, line {line}: added line uses CRLF line ending"
+msgstr ""
+
+#: gitchecks\app.py:62
+msgid "in {file}, line {line}: added line uses LF line ending"
+msgstr ""
+
+#: gitchecks\app.py:67
+msgid "in {file}, line {line}: change adds trailing whitespace"
+msgstr ""
+
+#: gitchecks\app.py:77
+msgid "gitchecks called without arguments\n"
+msgstr ""
+
+#: gitchecks\app.py:95
+#, python-format
+msgid "%d errors, aborting commit\n"
+msgstr ""
+
+#: gitchecks\main.py:27
+msgid "Couldn't setup the Python path\n"
+msgstr ""
