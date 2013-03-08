@@ -25,6 +25,8 @@ def check_commit(check_whitespace=True, whitespace_near=0, line_style=None):
     """
     if line_style is not None:
         line_style = line_style.lower()
+    if isinstance(check_whitespace, str):
+        check_whitespace = check_whitespace != '0'
     whitespace_near = int(whitespace_near)
 
     diff = subprocess.Popen(['git', 'diff', '--cached',
@@ -39,7 +41,7 @@ def check_commit(check_whitespace=True, whitespace_near=0, line_style=None):
         elif line.startswith('@@ '):
             lineno = int(chunkstart.match(line).group(1))
         elif line.startswith(' '):
-            if len(line) > 1 and line[-1] in whitespace:
+            if check_whitespace and len(line) > 1 and line[-1] in whitespace:
                 warning(
                         _(u"in {file}, line {line}: trailing whitespace "
                           "within {context_lines} lines of change").format(
@@ -60,7 +62,7 @@ def check_commit(check_whitespace=True, whitespace_near=0, line_style=None):
                             _(u"in {file}, line {line}: added line uses LF "
                               "line ending").format(
                             file=filename, line=lineno))
-                if line[-1] in whitespace:
+                if check_whitespace and line[-1] in whitespace:
                     error(
                             _(u"in {file}, line {line}: change adds trailing "
                               "whitespace").format(file=filename, line=lineno))
