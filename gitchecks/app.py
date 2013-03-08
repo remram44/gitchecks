@@ -20,9 +20,13 @@ def error(msg):
 
 chunkstart = re.compile(r'^@@ -[0-9]+(?:,[0-9+])? \+([0-9]+)(?:,[0-9+])?')
 
-def check_commit(check_whitespace=True, whitespace_near=0):
+def check_commit(check_whitespace=True, whitespace_near=0, line_style=None):
     """Checks that no trailing whitespace is added by the commit.
     """
+    if line_style is not None:
+        line_style = line_style.lower()
+    whitespace_near = int(whitespace_near)
+
     diff = subprocess.Popen(['git', 'diff', '--cached',
                              '-U%d' % whitespace_near],
                             stdout=subprocess.PIPE)
@@ -43,11 +47,24 @@ def check_commit(check_whitespace=True, whitespace_near=0):
                         context_lines=whitespace_near))
             lineno += 1
         elif line.startswith('+'):
-            if len(line) > 1 and line[-1] in whitespace:
-                error(
-                        _(u"in {file}, line {line}: change adds trailing "
-                          "whitespace").format(file=filename, line=lineno))
-                errors += 1
+            if len(line) > 1:
+                if line[-1] == '\r':
+                    if line_style == 'lf':
+                        error(
+                                _(u"in {file}, line {line}: added line uses "
+                                  "CRLF line ending").format(
+                                file=filename, line=lineno))
+                    line = line[:-1]
+                elif line_style == 'crlf':
+                    error(
+                            _(u"in {file}, line {line}: added line uses LF "
+                              "line ending").format(
+                            file=filename, line=lineno))
+                if line[-1] in whitespace:
+                    error(
+                            _(u"in {file}, line {line}: change adds trailing "
+                              "whitespace").format(file=filename, line=lineno))
+                    errors += 1
             lineno += 1
 
     return errors
