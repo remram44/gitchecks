@@ -18,7 +18,7 @@ def setup():
 
     # Setup the Python path
     try:
-        import knock.main
+        import gitchecks.main
     except ImportError:
         sys.path.insert(0, os.path.realpath(os.path.join(app_dir, '..')))
         try:
