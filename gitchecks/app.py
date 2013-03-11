@@ -18,7 +18,7 @@ def error(msg):
     sys.stderr.write("E: %s\n" % msg)
 
 
-chunkstart = re.compile(r'^@@ -[0-9]+(?:,[0-9+])? \+([0-9]+)(?:,[0-9+])?')
+chunkstart = re.compile(r'^@@ -[0-9]+(?:,[0-9]+)? \+([0-9]+)(?:,[0-9]+)?')
 
 def check_commit(check_whitespace=True, whitespace_near=0, line_style=None):
     """Checks that no trailing whitespace is added by the commit.
