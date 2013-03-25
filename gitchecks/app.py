@@ -20,13 +20,16 @@ def error(msg):
 
 chunkstart = re.compile(r'^@@ -[0-9]+(?:,[0-9]+)? \+([0-9]+)(?:,[0-9]+)?')
 
-def check_commit(check_whitespace=True, whitespace_near=0, line_style=None):
-    """Checks that no trailing whitespace is added by the commit.
+def check_commit(check_whitespace=True, whitespace_near=0, line_style=None,
+        check_mergeconflict=True):
+    """Checks what is about to be committed.
     """
     if line_style is not None:
         line_style = line_style.lower()
-    if isinstance(check_whitespace, str):
+    if isinstance(check_whitespace, basestring):
         check_whitespace = check_whitespace != '0'
+    if isinstance(check_mergeconflict, basestring):
+        check_mergeconflict = check_mergeconflict != '0'
     whitespace_near = int(whitespace_near)
 
     diff = subprocess.Popen(['git', 'diff', '--cached',
@@ -67,6 +70,14 @@ def check_commit(check_whitespace=True, whitespace_near=0, line_style=None):
                             _(u"in {file}, line {line}: change adds trailing "
                               "whitespace").format(file=filename, line=lineno))
                     errors += 1
+                if check_mergeconflict and (
+                        line.startswith('+>>>>>>>') or
+                        line.startswith('+<<<<<<<') or
+                        line.startswith('+=======')):
+                    error(
+                            _(u"in {file}, line {line}: committing a merge "
+                              "conflict marker").format(
+                            file=filename, line=lineno))
             lineno += 1
 
     return errors
