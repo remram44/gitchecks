@@ -1,3 +1,4 @@
+import os
 import re
 import string
 import subprocess
@@ -98,9 +99,26 @@ def parse_cmdline(args):
     return action, params
 
 
+def find_git_dir():
+    here = os.path.realpath('.')
+    while not os.path.exists('.git'):
+        parent = os.path.realpath('..')
+        if parent == here:
+            sys.stderr.write(_(u"Unable to find .git folder in parent "
+                               "directories! Aborting..."))
+            sys.exit(1)
+        os.chdir(parent)
+
+
 def main():
     action, params = parse_cmdline(sys.argv)
+    find_git_dir()
+
     if action == 'pre-commit':
+        # Are we merging?
+        if os.path.isfile('.git/MERGE_HEAD'):
+            sys.exit(0)
+
         errors = check_commit(**params)
         if errors > 0:
             sys.stderr.write(_(u"%d errors, aborting commit\n") % errors)
