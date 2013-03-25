@@ -22,16 +22,18 @@ def error(msg):
 chunkstart = re.compile(r'^@@ -[0-9]+(?:,[0-9]+)? \+([0-9]+)(?:,[0-9]+)?')
 
 def check_commit(check_whitespace=True, whitespace_near=0, line_style=None,
-        check_mergeconflict=True):
+        check_mergeconflict=True, python_check_debug=True):
     """Checks what is about to be committed.
     """
     if line_style is not None:
         line_style = line_style.lower()
     if isinstance(check_whitespace, basestring):
         check_whitespace = check_whitespace != '0'
+    whitespace_near = int(whitespace_near)
     if isinstance(check_mergeconflict, basestring):
         check_mergeconflict = check_mergeconflict != '0'
-    whitespace_near = int(whitespace_near)
+    if isinstance(python_check_debug, basestring):
+        python_check_debug = python_check_debug != '0'
 
     diff = subprocess.Popen(['git', 'diff', '--cached',
                              '-U%d' % whitespace_near],
@@ -79,6 +81,21 @@ def check_commit(check_whitespace=True, whitespace_near=0, line_style=None,
                             _(u"in {file}, line {line}: committing a merge "
                               "conflict marker").format(
                             file=filename, line=lineno))
+                if python_check_debug and filename[-3:].lower() == '.py':
+                    if 'print' in line:
+                        warning(
+                                _(u"in {file}, line {line}: print statement "
+                                  "added").format(file=filename, line=lineno))
+                    if 'pdb.set_trace(' in line:
+                        warning(
+                                _(u"in {file}, line {line}: adding "
+                                  "pdb.set_trace()").format(
+                                file=filename, line=lineno))
+                    if 'code.interact' in line:
+                        warning(
+                                _(u"in {file}, line {line}: adding "
+                                  "code.interact()").format(
+                                file=filename, line=lineno))
             lineno += 1
 
     return errors
