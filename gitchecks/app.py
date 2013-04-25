@@ -44,6 +44,11 @@ def check_commit(check_whitespace=True, whitespace_near=0, line_style=None,
     for line in stdout.split('\n'):
         if line.startswith('+++ b/'):
             filename = line[6:]
+        elif line.startswith('+++ '):
+            filename = None
+        elif not filename:
+            pass    # Here we might be handling a deleted file, or reading the
+                    # header
         elif line.startswith('@@ '):
             lineno = int(chunkstart.match(line).group(1))
         elif line.startswith(' '):
