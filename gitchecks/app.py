@@ -122,6 +122,10 @@ def parse_cmdline(args):
 
 
 def find_git_dir():
+    """Changes the current directory to the root and returns the .git folder.
+
+    In most cases, this would return '.git', except for submodules.
+    """
     here = os.path.realpath('.')
     while not os.path.exists('.git'):
         parent = os.path.realpath('..')
@@ -130,15 +134,32 @@ def find_git_dir():
                                "directories! Aborting..."))
             sys.exit(1)
         os.chdir(parent)
+    gitdir = '.git'
+    while not os.path.isdir(gitdir):
+        with open(gitdir) as fp:
+            line = fp.read()
+        if not line.startswith('gitdir: '):
+            sys.stderr.write(_(u"Invalid .git link file: %s\n") % gitdir)
+            sys.exit(1)
+        line = line[8:]
+        if line.endswith('\r\n'):
+            line = line[:-2]
+        elif line.endswith('\n'):
+            line = line[:-1]
+        gitdir = os.path.join(os.path.dirname(gitdir), line)
+        if not os.path.exists(gitdir):
+            sys.stderr.write(_(u"Path does not exist: %s\n") % gitdir)
+            sys.exit(1)
+    return gitdir
 
 
 def main():
     action, params = parse_cmdline(sys.argv)
-    find_git_dir()
+    gitdir = find_git_dir()
 
     if action == 'pre-commit':
         # Are we merging?
-        if os.path.isfile('.git/MERGE_HEAD'):
+        if os.path.isfile(os.path.join(gitdir, 'MERGE_HEAD')):
             sys.exit(0)
 
         errors = check_commit(**params)
