@@ -82,7 +82,7 @@ def check_commit(check_whitespace=True, whitespace_near=0, line_style=None,
                         line.startswith('+>>>>>>>') or
                         line.startswith('+<<<<<<<') or
                         line.startswith('+=======')):
-                    error(
+                    warning(
                             _(u"in {file}, line {line}: committing a merge "
                               "conflict marker").format(
                             file=filename, line=lineno))
