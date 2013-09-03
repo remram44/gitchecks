@@ -11,13 +11,6 @@ def iswhitespace(s):
     return all(c in whitespace for c in s)
 
 
-def warning(msg):
-    sys.stderr.write("W: %s\n" % msg)
-
-
-def error(msg):
-    sys.stderr.write("E: %s\n" % msg)
-
 
 chunkstart = re.compile(r'^@@ -[0-9]+(?:,[0-9]+)? \+([0-9]+)(?:,[0-9]+)?')
 
@@ -35,11 +28,19 @@ def check_commit(check_whitespace=True, whitespace_near=0, line_style=None,
     if isinstance(python_check_debug, basestring):
         python_check_debug = python_check_debug != '0'
 
+    results = {'errors': 0, 'warnings': 0}
+    def warning(msg):
+        sys.stderr.write("W: %s\n" % msg)
+        results['warnings'] += 1
+    def error(msg):
+        sys.stderr.write("E: %s\n" % msg)
+        results['errors'] += 1
+
     diff = subprocess.Popen(['git', 'diff', '--cached',
                              '-U%d' % whitespace_near],
                             stdout=subprocess.PIPE)
     stdout, stderr = diff.communicate()
-    errors = 0
+
     filename = None
     for line in stdout.split('\n'):
         if line.startswith('+++ b/'):
@@ -67,19 +68,16 @@ def check_commit(check_whitespace=True, whitespace_near=0, line_style=None,
                                 _(u"in {file}, line {line}: added line uses "
                                   "CRLF line ending").format(
                                 file=filename, line=lineno))
-                        errors += 1
                     line = line[:-1]
                 elif line_style == 'crlf':
                     error(
                             _(u"in {file}, line {line}: added line uses LF "
                               "line ending").format(
                             file=filename, line=lineno))
-                    errors += 1
                 if check_whitespace and line[-1] in whitespace:
                     error(
                             _(u"in {file}, line {line}: change adds trailing "
                               "whitespace").format(file=filename, line=lineno))
-                    errors += 1
                 if check_mergeconflict and (
                         line.startswith('+>>>>>>>') or
                         line.startswith('+<<<<<<<') or
@@ -105,7 +103,7 @@ def check_commit(check_whitespace=True, whitespace_near=0, line_style=None,
                                 file=filename, line=lineno))
             lineno += 1
 
-    return errors
+    return results
 
 
 def parse_cmdline(args):
@@ -164,8 +162,9 @@ def main():
         if os.path.isfile(os.path.join(gitdir, 'MERGE_HEAD')):
             sys.exit(0)
 
-        errors = check_commit(**params)
-        if errors > 0:
-            sys.stderr.write(_(u"%d errors, aborting commit\n") % errors)
+        results = check_commit(**params)
+        if results['errors'] > 0:
+            sys.stderr.write(
+                    _(u"%d errors, aborting commit\n") % results['errors'])
             sys.exit(1)
     sys.exit(0)
