@@ -67,12 +67,14 @@ def check_commit(check_whitespace=True, whitespace_near=0, line_style=None,
                                 _(u"in {file}, line {line}: added line uses "
                                   "CRLF line ending").format(
                                 file=filename, line=lineno))
+                        errors += 1
                     line = line[:-1]
                 elif line_style == 'crlf':
                     error(
                             _(u"in {file}, line {line}: added line uses LF "
                               "line ending").format(
                             file=filename, line=lineno))
+                    errors += 1
                 if check_whitespace and line[-1] in whitespace:
                     error(
                             _(u"in {file}, line {line}: change adds trailing "
